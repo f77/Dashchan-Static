@@ -6,4 +6,4 @@ This library contains Activity object that used for redirecting to main applicat
 
 # License
 
-* [MIT License](/Mishiranu/DashchanStatic/blob/master/LICENSE)
+* [MIT License](LICENSE)
