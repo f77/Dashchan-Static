@@ -1,0 +1,158 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'com.android.tools.build:gradle:2.1.0'
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:+'
+		classpath 'com.github.dcendents:android-maven-gradle-plugin:+'
+	}
+}
+
+allprojects {
+	repositories {
+		jcenter()
+	}
+}
+
+apply plugin: 'com.android.library'
+
+def Properties privateProperties = new Properties()
+
+if (new File("private.properties").exists()) {
+	privateProperties.load(new FileInputStream(file("private.properties")))
+}
+
+android {
+	compileSdkVersion 23
+	buildToolsVersion '23.0.3'
+
+	sourceSets.main {
+		manifest.srcFile 'AndroidManifest.xml'
+		java.srcDirs = ['src']
+		resources.srcDirs = ['src']
+		aidl.srcDirs = ['src']
+		renderscript.srcDirs = ['src']
+		res.srcDirs = ['res']
+		assets.srcDirs = ['assets']
+	}
+
+	buildTypes {
+		release {
+			minifyEnabled false
+		}
+	}
+
+	variantFilter { variant ->
+		if (variant.buildType.name != com.android.builder.core.BuilderConstants.RELEASE) {
+			variant.ignore = true
+		}
+	}
+
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_7
+		targetCompatibility JavaVersion.VERSION_1_7
+	}
+}
+
+android.libraryVariants.all { variant ->
+	def name = variant.buildType.name
+	def task = project.tasks.create 'jarRelease', Jar
+	task.dependsOn variant.javaCompile
+	task.from variant.javaCompile.destinationDir
+	task.exclude '**/BuildConfig.class'
+	task.exclude '**/R.class'
+	task.exclude '**/R$*.class'
+	artifacts.add('archives', task);
+}
+
+task sourcesJar(type: Jar) {
+	from android.sourceSets.main.java.srcDirs
+	classifier = 'sources'
+}
+
+artifacts {
+	archives sourcesJar
+}
+
+def bintrayUser = privateProperties.getProperty('bintray.user')
+def bintrayApiKey = privateProperties.getProperty('bintray.apikey')
+
+if (bintrayUser != null && bintrayApiKey != null) {
+	ext {
+		publishedGroupId = 'com.github.mishiranu'
+		libraryVersion = '1.0'
+
+		libraryDescription = 'Dashchan static library for extensions.'
+		gitUrl = 'https://github.com/Mishiranu/DashchanStatic'
+
+		developerId = 'mishiranu'
+		developerName = 'Fukurou Mishiranu'
+		developerEmail = 'fukurou.mishiranu@gmail.com'
+
+		licenseName = 'The MIT License'
+		licenseUrl = 'https://github.com/Mishiranu/DashchanStatic/blob/master/LICENSE'
+		allLicenses = ['MIT']
+	}
+
+	apply plugin: 'com.jfrog.bintray'
+
+	version = libraryVersion
+
+	bintray {
+		user = bintrayUser
+		key = bintrayApiKey
+
+		configurations = ['archives']
+		pkg {
+			repo = publishedGroupId
+			name = rootProject.name
+			desc = libraryDescription
+			vcsUrl = gitUrl
+			licenses = allLicenses
+			publish = true
+			publicDownloadNumbers = true
+			version.desc = libraryDescription
+		}
+	}
+
+	apply plugin: 'com.github.dcendents.android-maven'
+
+	group = publishedGroupId
+
+	install {
+		repositories.mavenInstaller {
+			pom {
+				project {
+					packaging 'jar'
+					groupId publishedGroupId
+					artifactId rootProject.name
+
+					name rootProject.name
+					description libraryDescription
+
+					licenses {
+						license {
+							name licenseName
+							url licenseUrl
+						}
+					}
+
+					developers {
+						developer {
+							id developerId
+							name developerName
+							email developerEmail
+						}
+					}
+
+					scm {
+						connection gitUrl
+						developerConnection gitUrl
+					}
+				}
+			}
+		}
+	}
+}
