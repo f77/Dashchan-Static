@@ -12,6 +12,6 @@ dependencies {
 }
 ```
 
-# License
+## License
 
-* [MIT License](LICENSE)
+Dashchan Static library is licensed under the [MIT License](LICENSE).
