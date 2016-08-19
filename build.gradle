@@ -20,8 +20,8 @@ apply plugin: 'com.android.library'
 
 def Properties privateProperties = new Properties()
 
-if (new File("private.properties").exists()) {
-	privateProperties.load(new FileInputStream(file("private.properties")))
+if (new File('private.properties').exists()) {
+	privateProperties.load(new FileInputStream(file('private.properties')))
 }
 
 android {
@@ -121,38 +121,32 @@ if (bintrayUser != null && bintrayApiKey != null) {
 
 	group = publishedGroupId
 
-	install {
-		repositories.mavenInstaller {
-			pom {
-				project {
-					packaging 'jar'
-					groupId publishedGroupId
-					artifactId rootProject.name
+	install.repositories.mavenInstaller.pom.project {
+		packaging 'jar'
+		groupId publishedGroupId
+		artifactId rootProject.name
 
-					name rootProject.name
-					description libraryDescription
+		name rootProject.name
+		description libraryDescription
 
-					licenses {
-						license {
-							name licenseName
-							url licenseUrl
-						}
-					}
-
-					developers {
-						developer {
-							id developerId
-							name developerName
-							email developerEmail
-						}
-					}
-
-					scm {
-						connection gitUrl
-						developerConnection gitUrl
-					}
-				}
+		licenses {
+			license {
+				name licenseName
+				url licenseUrl
 			}
+		}
+
+		developers {
+			developer {
+				id developerId
+				name developerName
+				email developerEmail
+			}
+		}
+
+		scm {
+			connection gitUrl
+			developerConnection gitUrl
 		}
 	}
 }
